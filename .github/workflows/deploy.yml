@@ -1,38 +1,25 @@
-name: Deploy to VM
-
 on:
-  push:
-    branches:
-      - master
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Create SSH directory
-        run: mkdir -p ~/.ssh
-
-      - name: Adding Known Hosts
-        run: ssh-keyscan -H 20.205.139.33 >> ~/.ssh/known_hosts
-
-      - name: Install SSH Key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.key_path }}
-
-      - name: Deploy to VM (using encrypted SSH key)
-        uses: appleboy/ssh-action@master
-        with:
-          host: 20.205.139.33
-          username: ${{ secrets.alpha}}
-          key: ${{ secrets.key_path }}
-          script: |
-            # Navigate to the backend-api directory
-            cd backend-api
-
-            # Install dependencies
-            npm install
-
-            # Start the application
-            npm start
+	push:
+	  branches:
+		- main
+	workflow_dispatch:
+  
+  jobs:
+	run_pull:
+	  name: Run pull
+	  runs-on: ubuntu-latest
+	  
+	  steps:
+		- name: Install SSH keys
+		  run: |
+			install -m 600 -D /dev/null ~/.ssh/id_rsa
+			echo "${{ secrets.key_path}}" > ~/.ssh/id_rsa
+			ssh-keyscan -H 20.205.139.3 >> ~/.ssh/known_hosts
+			
+		- name: Connect and pull
+		  run: |
+			ssh ${{ secrets.alpha }}@$20.205.139.3 "cd ${{ secrets.work_dir }} && git checkout ${{ secrets.main_branch }} && git pull && exit"
+			
+		- name: Cleanup
+		  run: rm -rf ~/.ssh
+  
