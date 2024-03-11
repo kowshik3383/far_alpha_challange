@@ -25,7 +25,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: 20.205.139.33
-          username: ${{ secrets.falpha_username }}
+          username: ${{ secrets.alpha_username }}
           key: ${{ secrets.key_path }}
           script: |
             # Navigate to the backend-api directory
